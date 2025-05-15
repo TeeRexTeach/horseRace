@@ -11,10 +11,12 @@
         .controls { margin-bottom: 20px; text-align: center; }
         .track { display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px; }
         .lane { position: relative; display: flex; align-items: center; gap: 5px; }
-        .horse { width: 30px; height: 30px; background-color: #ff6f61; border-radius: 50%; position: absolute; transition: left 0.3s ease; }
-        .track-line { flex-grow: 1; height: 30px; background-color: #ddd; border-radius: 15px; position: relative; }
+        .horse-img { width: 50px; height: 50px; position: absolute; transition: left 0.3s ease; }
+        .track-line { flex-grow: 1; height: 50px; background-color: #ddd; border-radius: 25px; position: relative; }
         .points { margin-left: 10px; font-weight: bold; }
         .group-name { font-weight: bold; margin-right: 10px; width: 150px; }
+        .back-button { margin-left: 10px; padding: 5px 10px; background-color: #f77; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .back-button:hover { background-color: #d55; }
         button { padding: 10px 20px; margin: 5px; border: none; background-color: #5a9; color: white; border-radius: 5px; cursor: pointer; }
         button:hover { background-color: #478; }
     </style>
@@ -36,7 +38,7 @@
             trackContainer.innerHTML = '';
             const numHorses = parseInt(document.getElementById('numHorses').value);
             const trackLength = parseInt(document.getElementById('trackLength').value);
-            horses = Array.from({ length: numHorses }, (_, i) => ({ position: 0, points: 0, groupName: `Group ${i + 1}` }));
+            horses = Array.from({ length: numHorses }, (_, i) => ({ position: 0, points: 0, groupName: `Group ${i + 1}`, imgSrc: `https://github.com/TeeRexTeach/horseRace/raw/main/images/horse${i + 1}.png` }));
             
             horses.forEach((horse, index) => {
                 const lane = document.createElement('div');
@@ -54,9 +56,10 @@
                 const trackLine = document.createElement('div');
                 trackLine.classList.add('track-line');
                 
-                const horseElem = document.createElement('div');
-                horseElem.classList.add('horse');
+                const horseElem = document.createElement('img');
+                horseElem.classList.add('horse-img');
                 horseElem.id = `horse-${index}`;
+                horseElem.src = horse.imgSrc;
                 horseElem.style.left = '0';
                 trackLine.appendChild(horseElem);
                 
@@ -65,9 +68,15 @@
                 pointsDisplay.id = `points-${index}`;
                 pointsDisplay.textContent = 'Points: 0';
                 
+                const backButton = document.createElement('button');
+                backButton.classList.add('back-button');
+                backButton.textContent = '⬅';
+                backButton.onclick = () => moveHorseBack(index);
+                
                 lane.appendChild(groupNameInput);
                 lane.appendChild(moveButton);
                 lane.appendChild(trackLine);
+                lane.appendChild(backButton);
                 lane.appendChild(pointsDisplay);
                 trackContainer.appendChild(lane);
             });
@@ -83,6 +92,13 @@
                 document.getElementById(`points-${index}`).textContent = `Points: ${horse.points}`;
             }
             renderHorses();
+        }
+
+        function moveHorseBack(index) {
+            if (horses[index].position > 0) {
+                horses[index].position--;
+                renderHorses();
+            }
         }
 
         function renderHorses() {
