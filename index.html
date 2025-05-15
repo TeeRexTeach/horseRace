@@ -6,25 +6,42 @@
     <title>Horse Race Game</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f9f9f9; 
+            margin: 0; 
+            padding: 20px; 
+            border: 25px solid #ccc; 
+            border-radius: 25px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); 
+        }
         h1 { text-align: center; color: #444; }
         .controls { margin-bottom: 20px; text-align: center; }
         .track { display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px; }
         .lane { position: relative; display: flex; align-items: center; gap: 5px; }
         .horse-img { width: 50px; height: 50px; position: absolute; transition: left 0.3s ease; }
-        .track-line { flex-grow: 1; height: 50px; background-color: #ddd; border-radius: 25px; position: relative; }
+        .track-line { 
+            flex-grow: 1; 
+            height: 50px; 
+            border-radius: 25px; 
+            position: relative; 
+            background: linear-gradient(90deg, #f0f4f8 0%, #dfe7ef 100%); 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
         .points { margin-left: 10px; font-weight: bold; }
         .group-name { font-weight: bold; margin-right: 10px; width: 150px; }
         .back-button { margin-left: 10px; padding: 5px 10px; background-color: #f77; color: white; border: none; border-radius: 5px; cursor: pointer; }
         .back-button:hover { background-color: #d55; }
-        .sub-header { text-align: center; color: black;}
+        .sub-header { text-align:center; color:black; }
         button { padding: 10px 20px; margin: 5px; border: none; background-color: #5a9; color: white; border-radius: 5px; cursor: pointer; }
         button:hover { background-color: #478; }
     </style>
 </head>
 <body>
     <h1>Horse Race!!</h1>
-        <p id="subH" class = "sub-header">~horsing around~</p>
+    <p id="subHeader1" class="sub-header">~horsing around~</p>
+    <p id="subHeader2" class="sub-header">Who is the best?</p>
+    <p id="subHeader3" class="sub-header">誰が一番うま？</p>
     <div class="controls">
         <label>Number of Horses: <input type="number" id="numHorses" min="1" value="3"></label>
         <label>Track Length: <input type="number" id="trackLength" min="5" value="10"></label>
