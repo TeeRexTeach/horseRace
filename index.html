@@ -36,6 +36,26 @@
         .hidden { display: none; }
         button { padding: 10px 20px; margin: 5px; border: none; background-color: #5a9; color: white; border-radius: 5px; cursor: pointer; }
         button:hover { background-color: #478; }
+        
+        @keyframes smoothSpin {
+            from {
+                transform: rotate(0deg);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        .celebration {
+            animation: smoothSpin 2s linear;
+            position: absolute;
+            width: 60px;
+            height: 31px;
+            z-index: 5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -109,19 +129,30 @@
             const trackLength = parseInt(document.getElementById('trackLength').value);
             const horse = horses[index];
             horse.position++;
+        
             if (horse.position >= trackLength) {
+                const horseElem = document.getElementById(`horse-${index}`);
+                const trackLine = horseElem.parentElement;
+        
+                const celebrationImg = document.createElement('img');
+                celebrationImg.src = 'https://github.com/TeeRexTeach/horseRace/blob/main/images/goal_flag.png?raw=true'; 
+                celebrationImg.classList.add('celebration');
+        
+                celebrationImg.style.left = horseElem.style.left;
+                celebrationImg.style.top = '8px'; 
+        
+                trackLine.appendChild(celebrationImg);
+        
+                setTimeout(() => {
+                    celebrationImg.remove();
+                }, 2000);
+        
                 horse.position = 0;
                 horse.points++;
                 document.getElementById(`points-${index}`).textContent = `Points: ${horse.points}`;
             }
-            renderHorses();
-        }
 
-        function moveHorseBack(index) {
-            if (horses[index].position > 0) {
-                horses[index].position--;
-                renderHorses();
-            }
+            renderHorses();
         }
 
         function renderHorses() {
