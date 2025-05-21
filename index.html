@@ -56,6 +56,25 @@
             z-index: 5;
             pointer-events: none;
         }
+        
+        @keyframes fadeOutRight {
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(100px); }
+        }
+
+        @keyframes fadeInLeft {
+            0% { opacity: 0; transform: translateX(-100px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .fade-out-right {
+            animation: fadeOutRight 0.8s forwards;
+        }
+        
+        .fade-in-left {
+            animation: fadeInLeft 0.8s forwards;
+        }
+
     </style>
 </head>
 <body>
@@ -128,32 +147,44 @@
         function moveHorse(index) {
             const trackLength = parseInt(document.getElementById('trackLength').value);
             const horse = horses[index];
+            const horseElem = document.getElementById(`horse-${index}`);
+
             horse.position++;
         
             if (horse.position >= trackLength) {
-                const horseElem = document.getElementById(`horse-${index}`);
+                // Show celebration
                 const trackLine = horseElem.parentElement;
-        
                 const celebrationImg = document.createElement('img');
                 celebrationImg.src = 'https://github.com/TeeRexTeach/horseRace/blob/main/images/goal_flag.png?raw=true'; 
                 celebrationImg.classList.add('celebration');
-        
                 celebrationImg.style.left = horseElem.style.left;
-                celebrationImg.style.top = '8px'; 
-        
+                celebrationImg.style.top = '8px';
                 trackLine.appendChild(celebrationImg);
+        
+                horseElem.classList.add('fade-out-right');
+        
+                setTimeout(() => {
+                    horse.position = 0;
+                    horse.points++;
+                    document.getElementById(`points-${index}`).textContent = `Points: ${horse.points}`;
+        
+                    horseElem.classList.remove('fade-out-right');
+                    horseElem.classList.add('fade-in-left');
+                    horseElem.style.left = '0px';
+        
+                    setTimeout(() => {
+                        horseElem.classList.remove('fade-in-left');
+                    }, 800);
+                }, 800); 
         
                 setTimeout(() => {
                     celebrationImg.remove();
                 }, 2000);
-        
-                horse.position = 0;
-                horse.points++;
-                document.getElementById(`points-${index}`).textContent = `Points: ${horse.points}`;
+            } else {
+                renderHorses();
             }
-
-            renderHorses();
         }
+
 
         function renderHorses() {
             const trackLength = parseInt(document.getElementById('trackLength').value);
