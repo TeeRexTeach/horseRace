@@ -185,6 +185,13 @@
             }
         }
 
+        function moveHorseBack(index) {
+            if (horses[index].position > 0) {
+                horses[index].position--;
+                renderHorses();
+            }
+        }
+
 
         function renderHorses() {
             const trackLength = parseInt(document.getElementById('trackLength').value);
