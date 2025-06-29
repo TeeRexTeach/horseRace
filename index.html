@@ -36,16 +36,10 @@
         .hidden { display: none; }
         button { padding: 10px 20px; margin: 5px; border: none; background-color: #5a9; color: white; border-radius: 5px; cursor: pointer; }
         button:hover { background-color: #478; }
-        
+
         @keyframes smoothSpin {
-            from {
-                transform: rotate(0deg);
-                opacity: 0;
-            }
-            to {
-                transform: rotate(360deg);
-                opacity: 1;
-            }
+            from { transform: rotate(0deg); opacity: 0; }
+            to { transform: rotate(360deg); opacity: 1; }
         }
 
         .celebration {
@@ -56,7 +50,7 @@
             z-index: 5;
             pointer-events: none;
         }
-        
+
         @keyframes fadeOutRight {
             0% { opacity: 1; transform: translateX(0); }
             100% { opacity: 0; transform: translateX(100px); }
@@ -67,25 +61,53 @@
             100% { opacity: 1; transform: translateX(0); }
         }
 
-        .fade-out-right {
-            animation: fadeOutRight 0.8s forwards;
-        }
-        
-        .fade-in-left {
-            animation: fadeInLeft 0.8s forwards;
+        .fade-out-right { animation: fadeOutRight 0.8s forwards; }
+        .fade-in-left { animation: fadeInLeft 0.8s forwards; }
+
+        .dice-controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        .dice-controls > div label { margin: 0 5px; }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            50% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .dice-roll-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            animation: fadeInOut 1.2s ease;
+            position: absolute;
+            top: -25px;
+            left: 0;
+        }
     </style>
 </head>
 <body>
     <div id="headers">
-    <h1>Horse Race!!</h1>
-    <p id="subHeader1" class="sub-header">~horsing around~</p>
-    <p id="subHeader2" class="sub-header">Who is the best?</p>
-    <p id="subHeader3" class="sub-header">誰が一番うま？</p>
+        <h1>Horse Race!!</h1>
+        <p id="subHeader1" class="sub-header">~horsing around~</p>
+        <p id="subHeader2" class="sub-header">Who is the best?</p>
+        <p id="subHeader3" class="sub-header">誰が一番うま？</p>
         <div class="controls">
             <label>Number of Horses: <input type="number" id="numHorses" min="1" value="3"></label>
             <label>Track Length: <input type="number" id="trackLength" min="5" value="10"></label>
+            <div class="dice-controls">
+                <label>
+                    <div>
+                        <input type="checkbox" id="enableDice" onchange="toggleDiceInputs()"> Enable Dice
+                    </div>
+                </label>
+                <label>X: <input type="number" id="diceX" value="1" disabled></label>
+                <label>Y: <input type="number" id="diceY" value="6" disabled></label>
+            </div>
             <button onclick="initializeGame()">Start Game</button>
             <button onclick="resetGame()">Reset</button>
         </div>
@@ -101,40 +123,46 @@
             const numHorses = parseInt(document.getElementById('numHorses').value);
             const trackLength = parseInt(document.getElementById('trackLength').value);
             horses = Array.from({ length: numHorses }, (_, i) => ({ position: 0, points: 0, groupName: `Group ${i + 1}`, imgSrc: `https://github.com/TeeRexTeach/horseRace/raw/main/images/horse${i + 1}.png` }));
-            
+
             horses.forEach((horse, index) => {
                 const lane = document.createElement('div');
                 lane.classList.add('lane');
-                
+
                 const groupNameInput = document.createElement('input');
                 groupNameInput.classList.add('group-name');
                 groupNameInput.value = horse.groupName;
                 groupNameInput.oninput = (e) => horse.groupName = e.target.value;
-                
+
                 const moveButton = document.createElement('button');
                 moveButton.textContent = `Horse ${index + 1}`;
                 moveButton.onclick = () => moveHorse(index);
-                
+
                 const trackLine = document.createElement('div');
                 trackLine.classList.add('track-line');
-                
+
                 const horseElem = document.createElement('img');
                 horseElem.classList.add('horse-img');
                 horseElem.id = `horse-${index}`;
                 horseElem.src = horse.imgSrc;
                 horseElem.style.left = '0';
                 trackLine.appendChild(horseElem);
-                
+
+                const diceDisplay = document.createElement('span');
+                diceDisplay.classList.add('dice-roll-display');
+                diceDisplay.id = `dice-roll-${index}`;
+                diceDisplay.style.display = 'none';
+                trackLine.appendChild(diceDisplay);
+
                 const pointsDisplay = document.createElement('span');
                 pointsDisplay.classList.add('points');
                 pointsDisplay.id = `points-${index}`;
                 pointsDisplay.textContent = 'Points: 0';
-                
+
                 const backButton = document.createElement('button');
                 backButton.classList.add('back-button');
                 backButton.textContent = '⬅';
                 backButton.onclick = () => moveHorseBack(index);
-                
+
                 lane.appendChild(groupNameInput);
                 lane.appendChild(moveButton);
                 lane.appendChild(trackLine);
@@ -149,34 +177,54 @@
             const horse = horses[index];
             const horseElem = document.getElementById(`horse-${index}`);
 
-            horse.position++;
-        
+            let moveAmount = 1;
+            const diceEnabled = document.getElementById('enableDice').checked;
+
+            if (diceEnabled) {
+                const rolled = rollDice();
+                if (rolled === null) return;
+                moveAmount = rolled;
+
+                const diceDisplay = document.getElementById(`dice-roll-${index}`);
+                diceDisplay.textContent = `🎲 ${rolled}`;
+                diceDisplay.style.display = 'block';
+                diceDisplay.style.left = horseElem.style.left;
+                diceDisplay.classList.remove('dice-roll-display');
+                void diceDisplay.offsetWidth;
+                diceDisplay.classList.add('dice-roll-display');
+
+                setTimeout(() => {
+                    diceDisplay.style.display = 'none';
+                }, 1200);
+            }
+
+            horse.position += moveAmount;
+
             if (horse.position >= trackLength) {
-                // Show celebration
                 const trackLine = horseElem.parentElement;
                 const celebrationImg = document.createElement('img');
-                celebrationImg.src = 'https://github.com/TeeRexTeach/horseRace/blob/main/images/goal_flag.png?raw=true'; 
+                celebrationImg.src = 'https://github.com/TeeRexTeach/horseRace/blob/main/images/goal_flag.png?raw=true';
                 celebrationImg.classList.add('celebration');
                 celebrationImg.style.left = horseElem.style.left;
                 celebrationImg.style.top = '8px';
                 trackLine.appendChild(celebrationImg);
-        
+
                 horseElem.classList.add('fade-out-right');
-        
+
                 setTimeout(() => {
                     horse.position = 0;
                     horse.points++;
                     document.getElementById(`points-${index}`).textContent = `Points: ${horse.points}`;
-        
+
                     horseElem.classList.remove('fade-out-right');
                     horseElem.classList.add('fade-in-left');
                     horseElem.style.left = '0px';
-        
+
                     setTimeout(() => {
                         horseElem.classList.remove('fade-in-left');
                     }, 800);
-                }, 800); 
-        
+                }, 800);
+
                 setTimeout(() => {
                     celebrationImg.remove();
                 }, 2000);
@@ -192,7 +240,6 @@
             }
         }
 
-
         function renderHorses() {
             const trackLength = parseInt(document.getElementById('trackLength').value);
             horses.forEach((horse, index) => {
@@ -206,9 +253,25 @@
         function resetGame() {
             initializeGame();
         }
-        
-         function toggleHeaders() {
+
+        function toggleHeaders() {
             document.getElementById('headers').classList.toggle('hidden');
+        }
+
+        function toggleDiceInputs() {
+            const enabled = document.getElementById('enableDice').checked;
+            document.getElementById('diceX').disabled = !enabled;
+            document.getElementById('diceY').disabled = !enabled;
+        }
+
+        function rollDice() {
+            const x = parseInt(document.getElementById('diceX').value);
+            const y = parseInt(document.getElementById('diceY').value);
+            if (isNaN(x) || isNaN(y) || x > y) {
+                alert('Please enter valid X and Y values (X should be less than or equal to Y).');
+                return null;
+            }
+            return Math.floor(Math.random() * (y - x + 1)) + x;
         }
 
         initializeGame();
