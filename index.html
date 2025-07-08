@@ -107,6 +107,8 @@
                 </label>
                 <label>X: <input type="number" id="diceX" value="1" disabled></label>
                 <label>Y: <input type="number" id="diceY" value="6" disabled></label>
+                <label>Exclude: <input type="text" id="excludeDice" placeholder="e.g. 5,7" disabled></label>
+
             </div>
             <button onclick="initializeGame()">Start Game</button>
             <button onclick="resetGame()">Reset</button>
@@ -262,17 +264,34 @@
             const enabled = document.getElementById('enableDice').checked;
             document.getElementById('diceX').disabled = !enabled;
             document.getElementById('diceY').disabled = !enabled;
+            document.getElementById('excludeDice').disabled = !enabled;
         }
 
         function rollDice() {
-            const x = parseInt(document.getElementById('diceX').value);
-            const y = parseInt(document.getElementById('diceY').value);
-            if (isNaN(x) || isNaN(y) || x > y) {
-                alert('Please enter valid X and Y values (X should be less than or equal to Y).');
-                return null;
-            }
-            return Math.floor(Math.random() * (y - x + 1)) + x;
-        }
+          const x = parseInt(document.getElementById('diceX').value);
+          const y = parseInt(document.getElementById('diceY').value);
+          const excludeInput = document.getElementById('excludeDice').value;
+          const excludeList = excludeInput.split(',').map(num => parseInt(num.trim())).filter(n => !isNaN(n));
+
+          if (isNaN(x) || isNaN(y) || x > y) {
+              alert('Please enter valid X and Y values (X should be less than or equal to Y).');
+              return null;
+          }
+
+          const validNumbers = [];
+          for (let i = x; i <= y; i++) {
+              if (!excludeList.includes(i)) validNumbers.push(i);
+          }
+
+          if (validNumbers.length === 0) {
+              alert('No valid numbers to roll. Please adjust your exclude list or dice range.');
+              return null;
+          }
+
+          const rolled = validNumbers[Math.floor(Math.random() * validNumbers.length)];
+          return rolled;
+      }
+
 
         initializeGame();
     </script>
